@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -28,24 +30,24 @@ public class AdminController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/create")
     @Operation(summary = "Зберегти дані про користувача, якого ще немає в базі даних")
-    public ResponseEntity<?> saveUserDetails(@Valid @RequestBody User user){
+    public Mono<ResponseEntity<?>> saveUserDetails(@Valid @RequestBody User user){
         service.save(user);
-        return new ResponseEntity<>("User created successfully", HttpStatus.OK);
+        return Mono.just(new ResponseEntity<>("User created successfully", HttpStatus.OK));
     }
 
     //@CacheEvict(value = "users", allEntries = true)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/delete")
     @Operation(summary = "Видалити всі дані про користувача за його електронною поштою")
-    public HttpStatus deleteUserDetails(@RequestBody String email){
+    public Mono<HttpStatus> deleteUserDetails(@RequestBody String email){
         service.delete(email);
-        return HttpStatus.OK;
+        return Mono.just(HttpStatus.OK);
     }
 
     //@Cacheable(value = "user")
     @GetMapping("/list/users")
     @Operation(summary = "Показати всі дані про користувачів, що існують в базі даних")
-    public List<?> showListOfAllUser(){
-        return service.findAllByRoleOrderByFirstname(String.valueOf(Role.USER));
+    public Flux<List<?>> showListOfAllUser(){
+        return Flux.just(service.findAllByRoleOrderByFirstname(String.valueOf(Role.USER)));
     }
 }

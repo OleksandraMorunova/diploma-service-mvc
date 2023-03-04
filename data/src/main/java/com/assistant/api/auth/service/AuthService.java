@@ -7,7 +7,6 @@ import com.assistant.api.auth.model.JwtAuthentication;
 import com.assistant.api.user.data.model.User;
 import com.assistant.api.user.service.NewAbstractService;
 import io.jsonwebtoken.Claims;
-import jakarta.security.auth.message.AuthException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,45 +24,41 @@ public class AuthService {
     private final Map<String, String> refreshStorage = new HashMap<>();
     private final JwtTokenProvider jwtProvider;
 
-    public JwtResponse login(@NonNull JwtRequest authRequest) throws AuthException {
-        final User user = service.findUserByEmail(authRequest.getEmail())
-                .orElseThrow(() -> new AuthException("User doesn't exist"));
+    public JwtResponse login(@NonNull JwtRequest authRequest) throws Exception {
+        final User user = service.findByEmail(authRequest.getEmail());
         if ((new String(Base64.getDecoder().decode(user.getPassword()), StandardCharsets.UTF_8)).equals(authRequest.getPassword())) {
             final String accessToken = jwtProvider.generateAccessToken(user);
             final String refreshToken = jwtProvider.generateRefreshToken(user);
             refreshStorage.put(user.getEmail(), refreshToken);
             return new JwtResponse(accessToken, refreshToken);
         } else {
-            throw new AuthException("Invalid password");
+            throw new Exception("Invalid password");
         }
     }
 
-    public JwtResponse refresh(@NonNull String refreshToken) throws AuthException {
+    public JwtResponse refresh(@NonNull String refreshToken) throws Exception {
         if (jwtProvider.validateRefreshToken(refreshToken)) {
             final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
             final String login = claims.getSubject();
             final String saveRefreshToken = refreshStorage.get(login);
             if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
-                final User user = service.findUserByEmail(login)
-                        .orElseThrow(() -> new AuthException("User doesn't exist"));
-
+                final User user = service.findByEmail(login);
                 final String accessToken = jwtProvider.generateAccessToken(user);
                 final String newRefreshToken = jwtProvider.generateRefreshToken(user);
                 refreshStorage.put(user.getEmail(), newRefreshToken);
                 return new JwtResponse(accessToken, newRefreshToken);
             }
         }
-        throw new AuthException("Invalid Token");
+        throw new Exception("Invalid Token");
     }
 
-    public JwtResponse getAccessToken(@NonNull String refreshToken) throws AuthException {
+    public JwtResponse getAccessToken(@NonNull String refreshToken) {
         if (jwtProvider.validateRefreshToken(refreshToken)) {
             final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
             final String login = claims.getSubject();
             final String saveRefreshToken = refreshStorage.get(login);
             if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
-                final User user = service.findUserByEmail(login)
-                        .orElseThrow(() -> new AuthException("User doesn't exist"));
+                final User user = service.findByEmail(login);
                 final String accessToken = jwtProvider.generateAccessToken(user);
                 return new JwtResponse(accessToken, null);
             }

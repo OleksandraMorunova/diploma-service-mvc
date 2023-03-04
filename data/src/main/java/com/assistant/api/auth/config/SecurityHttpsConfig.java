@@ -1,40 +1,51 @@
 package com.assistant.api.auth.config;
 
-import org.apache.catalina.Context;
-import org.apache.catalina.connector.Connector;
-import org.apache.tomcat.util.descriptor.web.SecurityCollection;
-import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
-import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
+
+import javax.validation.constraints.NotNull;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
 
 @Configuration
 public class SecurityHttpsConfig {
 
     @Bean
-    public ServletWebServerFactory servletContainer() {
-        TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() {
+    public WebFilter httpsRedirectFilter() {
+        return new WebFilter() {
+            @ConditionalOnProperty(value="server.port", havingValue = "8443")
             @Override
-            protected void postProcessContext(Context context) {
-                var securityConstraint = new SecurityConstraint();
-                securityConstraint.setUserConstraint("CONFIDENTIAL");
-                var collection = new SecurityCollection();
-                collection.addPattern("/*");
-                securityConstraint.addCollection(collection);
-                context.addConstraint(securityConstraint);
+            public Mono<Void> filter(@NotNull ServerWebExchange exchange,@NotNull WebFilterChain chain) {
+                URI originalUri = exchange.getRequest().getURI();
+
+                List<String> forwardedValues = exchange.getRequest().getHeaders().get("x-forwarded-proto");
+                if (forwardedValues != null && forwardedValues.contains("http")) {
+                    try {
+                        URI mutatedUri = new URI("https",
+                                originalUri.getUserInfo(),
+                                originalUri.getHost(),
+                                originalUri.getPort(),
+                                originalUri.getPath(),
+                                originalUri.getQuery(),
+                                originalUri.getFragment());
+                        ServerHttpResponse response = exchange.getResponse();
+                        response.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
+                        response.getHeaders().setLocation(mutatedUri);
+                        return Mono.empty();
+                    } catch (URISyntaxException e) {
+                        throw new IllegalStateException(e.getMessage(), e);
+                    }
+                }
+                return chain.filter(exchange);
             }
         };
-        tomcat.addAdditionalTomcatConnectors(getHttpConnector());
-        return tomcat;
-    }
-
-    private Connector getHttpConnector() {
-        var connector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
-        connector.setScheme("http");
-        connector.setPort(8080);
-        connector.setSecure(false);
-        connector.setRedirectPort(8443);
-        return connector;
     }
 }

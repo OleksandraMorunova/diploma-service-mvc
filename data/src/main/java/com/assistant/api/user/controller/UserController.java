@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
@@ -17,7 +18,6 @@ import java.util.Optional;
 @RestController
 public class UserController {
     private final NewAbstractService service;
-
     @Autowired
     public UserController(NewAbstractService service) {
         this.service = service;
@@ -26,17 +26,17 @@ public class UserController {
     //@Cacheable(value = "users", key = "#user.email")
     @GetMapping("/user/{email}")
     @Operation(summary = "Знайти дані про користувача за його електронною поштою")
-    public Optional<?> findUserDetails(@PathVariable String email){
-        return Optional.ofNullable(service.findUserByEmail(email).orElseThrow(() -> new ResourceNotFoundException("Record not found with id : " + email)));
+    public Mono<Optional<?>> findUserDetails(@PathVariable String email){
+        return Mono.just(Optional.ofNullable(service.findUserByEmail(email).orElseThrow(() -> new ResourceNotFoundException("Record not found with id : " + email))));
     }
 
     //@CacheEvict(value = "users", allEntries = true)
     //@ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/update/{email}")
     @Operation(summary = "Оновити дані про користувача, який вже існує в базі даних")
-    public ResponseEntity<?> updateUserDetails(@PathVariable String email, @RequestBody User user){
+    public Mono<ResponseEntity<?>> updateUserDetails(@PathVariable String email, @RequestBody User user){
         user.setEmail(email);
-        return ResponseEntity.ok().body(this.service.update(user));
+        return Mono.just(ResponseEntity.ok().body(this.service.update(user)));
     }
 
     @CacheEvict(value = "users", allEntries = true)
