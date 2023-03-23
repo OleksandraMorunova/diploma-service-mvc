@@ -17,8 +17,8 @@ public abstract class AbstractOneTimeCodeService<T, ID extends Serializable> imp
     }
 
     @Override
-    public T deleteCode(ID code) {
-        return repository.findUserByCode(null);
+    public void deleteCode(ID code) {
+        repository.findUserByCode(null);
     }
 
     @Override

@@ -49,14 +49,14 @@ public class OneTimeCodeService extends AbstractOneTimeCodeService<User, String>
     }
 
     @Override
-    public User deleteCode(String code){
+    public void deleteCode(String code){
         Optional<User> u = Optional.ofNullable(repository.findUserByCode(code));
         if(u.isPresent() && validateCode(code)){
             User new_u = u.get();
             if(LocalDateTime.now().isBefore(LocalDateTime.parse(new_u.getCodeData()).plusMinutes(5))){
                 new_u.setCode(null);
                 new_u.setCodeData(null);
-                return repository.save(new_u);
+                repository.save(new_u);
             } else throw new EntityNotFoundException(User.class, "Час активності коду минув : ", u.get().getCode());
         } else throw new EntityNotFoundException(String.class, "id", code);
     }

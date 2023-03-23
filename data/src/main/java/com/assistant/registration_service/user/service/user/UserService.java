@@ -22,56 +22,58 @@ import java.util.Optional;
 
 @Service
 public class UserService extends UserAbstractService<User,String> {
-    private final EncodedData encodedData = new EncodedData();
-
     private final RestTemplate restTemplate;
 
     @Autowired
-    public UserService(EntityRepository<User, String> repository, RestTemplate restTemplate) {
+    public UserService(EntityRepository<User, String> repository, RestTemplate restTemplate){
         super(repository);
         this.restTemplate = restTemplate;
     }
 
     @Override
+    public User findUserByPhone(String phoneNumber){
+        return repository.findUserByPhone(EncodedData.encoded(phoneNumber));
+    }
+
+    @Override
+    public User findUserByEmail(String email) {
+        return repository.findUserByEmail(EncodedData.encoded(email));
+    }
+
+    @Override
+    public User findAllByStatusAndRolesOrderByName(String status){
+        return repository.findAllByStatusAndRolesOrderByName(status, Role.USER.name());
+    }
+
+    @Override
     @Transactional
-    public User save(User entity) {
+    public User saveUser(User entity){
         Optional<User> u = Optional.ofNullable(findUserByPhone(entity.getPhone()));
         if(u.isEmpty()){
-            entity.setName(encodedData.encoded(entity.getName()));
-            entity.setPhone(encodedData.encoded(entity.getPhone()));
+            entity.setName(EncodedData.encoded(entity.getName()));
+            entity.setPhone(EncodedData.encoded(entity.getPhone()));
             entity.setStatus(String.valueOf(UserStatus.DEACTIVATED));
-            entity.setCode("");
-            entity.setCodeData("");
+            entity.setCode(null); entity.setCodeData(null); entity.setToken(null);
             return repository.save(entity);
         } else throw new ResourceNotFoundException("Email exist: " + entity.getEmail());
 
     }
 
-    public User update(String phone, User entity) {
+    public User updateUser(String phone, User entity){
         Optional<User> u = Optional.ofNullable(findUserByPhone(phone));
         if(u.isPresent()){
             User optional = u.get();
             System.out.println( optional.getPhone());
-            optional.setEmail(entity.getEmail() != null ? encodedData.encoded(entity.getEmail()) : optional.getEmail());
-            optional.setPhone(entity.getPhone() != null ? encodedData.encoded(entity.getPhone()) : optional.getPhone());
-            optional.setPassword(entity.getPassword() != null ? encodedData.encoded(entity.getPassword()) : optional.getPassword());
+            optional.setEmail(entity.getEmail() != null ? EncodedData.encoded(entity.getEmail()) : optional.getEmail());
+            optional.setPhone(entity.getPhone() != null ? EncodedData.encoded(entity.getPhone()) : optional.getPhone());
+            optional.setPassword(entity.getPassword() != null ? EncodedData.encoded(entity.getPassword()) : optional.getPassword());
             return repository.save(optional);
         } else {
             throw new ResourceNotFoundException("Record not found with phone or email");
         }
     }
 
-    @Override
-    public User findUserByPhone(String phoneNumber) {
-        return repository.findUserByPhone(encodedData.encoded(phoneNumber));
-    }
-
-    @Override
-    public User findUserByEmail(String email) {
-        return repository.findUserByEmail(encodedData.encoded(email));
-    }
-
-    public ResponseDto getUser(String email) {
+    public ResponseDto getUser(String email){
         ResponseDto response = new ResponseDto();
         User user = findUserByEmail(email);
         ResponseEntity<TaskDto[]> responseEntity = restTemplate
@@ -100,10 +102,5 @@ public class UserService extends UserAbstractService<User,String> {
                 } else throw new EntityNotFoundException(String.class, "Не відповідає значенню", value);
             } else throw new EntityNotFoundException(String.class, "Значення не існує зі вказаними параметрами", value);
         } else throw new EntityNotFoundException(String.class, "Не відповідає значенню (не номер і не пошта)", value);
-    }
-
-    @Override
-    public User findAllByStatusAndRolesOrderByName(String status) {
-        return repository.findAllByStatusAndRolesOrderByName(status, Role.USER.name());
     }
 }

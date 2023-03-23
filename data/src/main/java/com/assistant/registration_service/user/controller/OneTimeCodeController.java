@@ -31,7 +31,9 @@ public class OneTimeCodeController {
 
     @DeleteMapping("/get/code/{code}")
     @Operation(summary = "Перевірити існування паролю та видаляє його")
-    public ResponseEntity<?> getAndDeleteCode(@Valid @PathVariable("code") @Pattern(regexp = "[0-9]+") @NotBlank(message = "Code may not be empty") @Size(min = 5, max = 5, message = "Name must be 5 characters long") String code) {
+    public ResponseEntity<?> getAndDeleteCode(@Valid @PathVariable("code") @Pattern(regexp = "[0-9]+")
+                                                  @NotBlank(message = "Code may not be empty")
+                                                  @Size(min = 5, max = 5, message = "Name must be 5 characters long") String code) {
         service.deleteCode(code);
         return new ResponseEntity<>(HttpStatus.OK);
     }

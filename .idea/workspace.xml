@@ -42,7 +42,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "C:/Users/User/Desktop/registration_service_mvc",
+    "last_opened_file_path": "C:/Users/User/Documents/GitHub/eureka-service/eureka",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -113,10 +113,26 @@
       <workItem from="1679218325412" duration="15419000" />
       <workItem from="1679483228391" duration="18487000" />
       <workItem from="1679515508352" duration="2617000" />
+      <workItem from="1679520551622" duration="2916000" />
+      <workItem from="1679562610786" duration="9112000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" type="java-exception">
+          <properties class="com.netflix.discovery.shared.transport.TransportException" package="com.netflix.discovery.shared.transport" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+        <breakpoint enabled="true" type="java-exception">
+          <properties class="io.jsonwebtoken.ExpiredJwtException" package="io.jsonwebtoken" />
+          <option name="timeStamp" value="2" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

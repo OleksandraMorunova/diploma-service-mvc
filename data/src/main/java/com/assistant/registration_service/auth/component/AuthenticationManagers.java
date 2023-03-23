@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -24,15 +25,14 @@ public class AuthenticationManagers implements AuthenticationManager {
     public Authentication authenticate(Authentication authentication) {
         String jwt = authentication.getCredentials().toString();
         String username = jwtProvider.getAccessClaims(jwt).getSubject();
-
         if(jwtProvider.validateAccessToken(jwt)){
             Claims claims = jwtProvider.getAccessClaims(jwt);
-            List<String> roles = claims.get("role", List.class);
+            List<String> listRoles = Arrays.asList(claims.get("role", String[].class));
             try {
                 return new UsernamePasswordAuthenticationToken(
                         username,
                         null,
-                        roles.stream().map(SimpleGrantedAuthority::new).toList()
+                        listRoles.stream().map(SimpleGrantedAuthority::new).toList()
                 );
             } catch (Exception e){
                 logger.error(e.getMessage());

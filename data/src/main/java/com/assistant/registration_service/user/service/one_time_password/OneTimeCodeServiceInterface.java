@@ -4,6 +4,6 @@ import java.io.Serializable;
 
 public interface OneTimeCodeServiceInterface<T, ID extends Serializable> {
     T sentToPhoneNumberAndDataBase(T phoneNumber);
-    T deleteCode(ID code);
+    void deleteCode(ID code);
     T sentToEmailAndDataBase(T user);
 }

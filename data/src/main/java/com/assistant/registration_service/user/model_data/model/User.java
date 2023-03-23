@@ -56,6 +56,9 @@ public class User implements Serializable {
     @Schema(description = "Одноразовий пароль для входу")
     private String code;
 
+    @Field("token")
+    private Map<String, String> token;
+
     @Field("one_time_code_data")
     @Schema(description = "Дата створення одноразового паролю для входу")
     private String codeData;

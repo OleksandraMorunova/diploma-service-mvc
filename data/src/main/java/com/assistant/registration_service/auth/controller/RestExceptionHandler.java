@@ -2,6 +2,8 @@ package com.assistant.registration_service.auth.controller;
 
 import com.assistant.registration_service.auth.domain.ApiError;
 import com.assistant.registration_service.auth.exceptions.EntityNotFoundException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.security.auth.message.AuthException;
 import jakarta.validation.*;
 import org.springframework.core.Ordered;
@@ -64,21 +66,39 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-    private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {
-        return new ResponseEntity<>(apiError, apiError.getStatus());
-    }
-
-    @ExceptionHandler(EntityNotFoundException.class) //Виняток виникає коли не знайдено дані.
+    @ExceptionHandler({ EntityNotFoundException.class }) //Виняток виникає коли не знайдено дані.
     protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
         String error =  "Data which client search don't exist";
         ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, String.valueOf(HttpStatus.NOT_FOUND.value()), ex.getLocalizedMessage(), error);
         return buildResponseEntity(apiError);
     }
 
-    @ExceptionHandler(AuthException.class)
-    protected  ResponseEntity<Object> handleAuthException(AuthException ex){
+    @ExceptionHandler({ AuthException.class })
+    protected ResponseEntity<Object> handleAuthException(AuthException ex){
         String error =  "Token don't right type or the payload";
         ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, String.valueOf(HttpStatus.NOT_FOUND.value()), ex.getMessage(), error);
         return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler({ ExpiredJwtException.class })
+    protected ResponseEntity<Object> handleExpiredJwtException(ExpiredJwtException ex){
+        ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, String.valueOf(HttpStatus.FORBIDDEN.value()), ex.getMessage(), "JWT expired and it rejected");
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler({ MalformedJwtException.class })
+    protected ResponseEntity<Object> handleMalformedJwtException(MalformedJwtException ex){
+        ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, String.valueOf(HttpStatus.FORBIDDEN.value()), ex.getMessage(), "Malformed jwt exception");
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler({ SecurityException.class })
+    protected ResponseEntity<Object> handleSecurityException(SecurityException ex){
+        ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, String.valueOf(HttpStatus.FORBIDDEN.value()), ex.getMessage(), "Calculating a signature or verifying an existing signature of a JWT failed.");
+        return buildResponseEntity(apiError);
+    }
+
+    private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {
+        return new ResponseEntity<>(apiError, apiError.getStatus());
     }
 }
