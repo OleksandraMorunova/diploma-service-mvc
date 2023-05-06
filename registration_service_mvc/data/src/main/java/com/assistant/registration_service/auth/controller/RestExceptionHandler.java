@@ -2,6 +2,7 @@ package com.assistant.registration_service.auth.controller;
 
 import com.assistant.registration_service.auth.domain.ApiError;
 import com.assistant.registration_service.auth.exceptions.EntityNotFoundException;
+import com.assistant.registration_service.auth.exceptions.ResourceNotFoundException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.security.auth.message.AuthException;
@@ -17,6 +18,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.security.auth.login.CredentialException;
 import java.util.*;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -73,6 +75,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(apiError);
     }
 
+    @ExceptionHandler({ CredentialException.class }) //Виняток виникає коли не знайдено дані.
+    protected ResponseEntity<Object> handleCredentialException(CredentialException ex) {
+        String error =  "JWT has a difference of milliseconds";
+        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, String.valueOf(HttpStatus.NOT_FOUND.value()), ex.getLocalizedMessage(), error);
+        return buildResponseEntity(apiError);
+    }
+
     @ExceptionHandler({ AuthException.class })
     protected ResponseEntity<Object> handleAuthException(AuthException ex){
         String error =  "Token don't right type or the payload";
@@ -96,6 +105,12 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleSecurityException(SecurityException ex){
         ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, String.valueOf(HttpStatus.FORBIDDEN.value()), ex.getMessage(), "Calculating a signature or verifying an existing signature of a JWT failed.");
         return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler({ ResourceNotFoundException.class })
+    protected ResponseEntity<Object> handleSecurityException(ResourceNotFoundException ex){
+        ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, String.valueOf(HttpStatus.FORBIDDEN.value()), ex.getMessage(), "Doesn't exist data of inputting values");
+        return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 
     private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {

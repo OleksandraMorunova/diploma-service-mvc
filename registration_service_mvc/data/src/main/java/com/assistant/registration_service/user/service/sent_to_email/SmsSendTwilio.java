@@ -5,6 +5,11 @@ import com.twilio.rest.api.v2010.account.Message;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * Receive logs program
+ * @author Oleksandra Morunova
+ *
+ */
 @Service
 public class SmsSendTwilio {
     @Value("${TWILIO_ACCOUNT_SID}") String ACCOUNT_SID;

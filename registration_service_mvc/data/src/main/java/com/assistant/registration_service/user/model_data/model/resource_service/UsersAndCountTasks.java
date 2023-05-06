@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponseDto {
-    private User userDto;
-    private List<TaskDto> taskDto;
+public class UsersAndCountTasks {
+    private List<User> userList;
+    private List<Integer> integerList;
 }

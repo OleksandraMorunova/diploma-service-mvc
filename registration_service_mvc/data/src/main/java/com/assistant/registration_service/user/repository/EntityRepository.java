@@ -4,12 +4,14 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import java.io.Serializable;
+import java.util.List;
+
+/**
+ * Receive logs program
+ * @author Oleksandra Morunova
+ *
+ */
 
 @NoRepositoryBean
 public interface EntityRepository<T,ID extends Serializable> extends MongoRepository<T, ID> {
-    T findUserByEmail(ID email);
-    T findUserByPhone(ID phoneNumber);
-    T findUserByCode(ID code);
-    T deleteUserByEmail(ID email);
-    T findAllByStatusAndRolesOrderByName(ID status, ID roles);
 }

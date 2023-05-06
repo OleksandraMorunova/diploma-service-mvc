@@ -3,63 +3,93 @@ package com.assistant.registration_service.user.service.user;
 import com.assistant.registration_service.auth.exceptions.EntityNotFoundException;
 import com.assistant.registration_service.user.model_data.enums.Role;
 import com.assistant.registration_service.user.model_data.enums.UserStatus;
-import com.assistant.registration_service.user.model_data.model.resource_service.ResponseDto;
+import com.assistant.registration_service.user.model_data.model.LoadFile;
+import com.assistant.registration_service.user.model_data.model.resource_service.UserAndTasks;
 import com.assistant.registration_service.user.model_data.model.resource_service.TaskDto;
 import com.assistant.registration_service.user.model_data.model.User;
+import com.assistant.registration_service.user.model_data.model.resource_service.UsersAndCountTasks;
 import com.assistant.registration_service.user.repository.EntityRepository;
+import com.assistant.registration_service.user.repository.UserEntityRepository;
 import com.assistant.registration_service.user.service.EncodedData;
 import com.assistant.registration_service.auth.exceptions.ResourceNotFoundException;
+import com.assistant.registration_service.user.service.task.TaskFeignClientInterface;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import com.mongodb.client.gridfs.model.GridFSFile;
+import feign.FeignException;
+import org.apache.commons.io.IOUtils;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsOperations;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.io.IOException;
+import java.util.*;
 
 @Service
 public class UserService extends UserAbstractService<User,String> {
-    private final RestTemplate restTemplate;
+    private final TaskFeignClientInterface clientInterface;
+    private final GridFsTemplate gridFsTemplate;
+    private final GridFsOperations gridFsOperations;
 
     @Autowired
-    public UserService(EntityRepository<User, String> repository, RestTemplate restTemplate){
+    public UserService(EntityRepository<User, String> repository, UserEntityRepository userEntityRepository, TaskFeignClientInterface clientInterface, GridFsTemplate gridFsTemplate, GridFsOperations gridFsOperations){
         super(repository);
-        this.restTemplate = restTemplate;
+        this.gridFsTemplate = gridFsTemplate;
+        this.gridFsOperations = gridFsOperations;
+        this.userEntityRepository = userEntityRepository;
+        this.clientInterface = clientInterface;
     }
 
     @Override
     public User findUserByPhone(String phoneNumber){
-        return repository.findUserByPhone(EncodedData.encoded(phoneNumber));
+        return userEntityRepository.findUserByPhone(EncodedData.encoded(phoneNumber));
     }
 
     @Override
     public User findUserByEmail(String email) {
-        return repository.findUserByEmail(EncodedData.encoded(email));
+        return userEntityRepository.findUserByEmail(EncodedData.encoded(email));
     }
 
-    @Override
-    public User findAllByStatusAndRolesOrderByName(String status){
-        return repository.findAllByStatusAndRolesOrderByName(status, Role.USER.name());
+    public UsersAndCountTasks findAllByRolesOrderByName(){
+        List<User> userList = userEntityRepository.findUsersByRolesOrderByName(Role.USER.name());
+        List<Integer> integerList = new ArrayList<>();
+        userList.forEach(l -> {
+            try {
+                ResponseEntity<List<TaskDto>> r = clientInterface.getListOfTasksForUserById(l.getId());
+                if(r.getBody() != null) integerList.add(r.getBody().size());
+            } catch (FeignException e){
+                integerList.add(0);
+            }
+        });
+        return new UsersAndCountTasks(userList, integerList);
     }
 
-    @Override
     @Transactional
-    public User saveUser(User entity){
+    public User saveUser(User entity, MultipartFile multipartFile) throws IOException {
         Optional<User> u = Optional.ofNullable(findUserByPhone(entity.getPhone()));
-        if(u.isEmpty()){
+        if(u.isEmpty() && entity.getRoles() != null){
             entity.setName(EncodedData.encoded(entity.getName()));
             entity.setPhone(EncodedData.encoded(entity.getPhone()));
+            entity.setRoles(entity.getRoles());
             entity.setStatus(String.valueOf(UserStatus.DEACTIVATED));
             entity.setCode(null); entity.setCodeData(null); entity.setToken(null);
+            if(multipartFile != null && !multipartFile.isEmpty()){
+                String documents = String.valueOf(uploadFilesByGridFs(multipartFile));
+                entity.setIcon(documents);
+            }
             return repository.save(entity);
-        } else throw new ResourceNotFoundException("Email exist: " + entity.getEmail());
+        } else throw new ResourceNotFoundException("Phone number exist: " + entity.getPhone() + " or don't set roles.");
 
     }
 
-    public User updateUser(String phone, User entity){
+    public User updateUser(String phone, User entity, MultipartFile multipartFile) throws IOException {
         Optional<User> u = Optional.ofNullable(findUserByPhone(phone));
         if(u.isPresent()){
             User optional = u.get();
@@ -67,21 +97,45 @@ public class UserService extends UserAbstractService<User,String> {
             optional.setEmail(entity.getEmail() != null ? EncodedData.encoded(entity.getEmail()) : optional.getEmail());
             optional.setPhone(entity.getPhone() != null ? EncodedData.encoded(entity.getPhone()) : optional.getPhone());
             optional.setPassword(entity.getPassword() != null ? EncodedData.encoded(entity.getPassword()) : optional.getPassword());
+            optional.setRoles(entity.getRoles() != null ? entity.getRoles() : optional.getRoles());
+
+            if(multipartFile != null && !multipartFile.isEmpty()){
+                if(u.get().getIcon() != null){
+                    String o = String.valueOf(uploadFilesByGridFs(multipartFile));
+                    optional.setIcon(o);
+                } else {
+                    String newFiles = String.valueOf(uploadFilesByGridFs(multipartFile));
+                    optional.setIcon(newFiles);
+                }
+            }
             return repository.save(optional);
         } else {
             throw new ResourceNotFoundException("Record not found with phone or email");
         }
     }
 
-    public ResponseDto getUser(String email){
-        ResponseDto response = new ResponseDto();
-        User user = findUserByEmail(email);
-        ResponseEntity<TaskDto[]> responseEntity = restTemplate
-                .getForEntity("http://RESOURCE-SERVICE:8443/api/v1/task/list/" + user.getId(), TaskDto[].class);
-        List<TaskDto> task = Arrays.asList(Objects.requireNonNull(responseEntity.getBody()));
-        response.setUserDto(user);
-        response.setTaskDto(task);
-        return response;
+    public UserAndTasks getUser(String email){
+        UserAndTasks response = new UserAndTasks();
+        User user;
+        if(email.contains("@")){
+            user = findUserByEmail(email);
+        } else {
+            user = userEntityRepository.findUserById(email);
+        }
+
+        if(user != null){
+           try{
+               ResponseEntity<List<TaskDto>> r = clientInterface.getListOfTasksForUserById(user.getId());
+               List<TaskDto> task = r.getBody();
+               response.setUserDto(user);
+               response.setTaskDto(task);
+               return response;
+           } catch (FeignException e){
+               response.setUserDto(user);
+               response.setTaskDto(null);
+               return response;
+           }
+        } else throw new EntityNotFoundException(String.class, "Значення не існує зі вказаними параметрами: ", email);
     }
 
     @Override
@@ -91,16 +145,53 @@ public class UserService extends UserAbstractService<User,String> {
             if(userEmail.isPresent()){
                 if(Objects.equals(userEmail.get().getStatus(), UserStatus.ACTIVE.toString())){
                     return findUserByEmail(value);
-                } else throw new EntityNotFoundException(String.class, "Не відповідає значенню", value);
-            } else throw new EntityNotFoundException(String.class, "Значення не існує зі вказаними параметрами", value);
+                } else throw new EntityNotFoundException(String.class, "Не відповідає значенню, ", value);
+            } else throw new EntityNotFoundException(String.class, "Значення не існує зі вказаними параметрами: ", value);
         }
         else if(value.matches("(?=.*[0-9]+).{4,15}")){
             Optional<User> userPhone = Optional.ofNullable(findUserByPhone(value));
             if(userPhone.isPresent()){
                 if(Objects.equals(userPhone.get().getStatus(), UserStatus.DEACTIVATED.toString())) {
                     return findUserByPhone(value);
-                } else throw new EntityNotFoundException(String.class, "Не відповідає значенню", value);
-            } else throw new EntityNotFoundException(String.class, "Значення не існує зі вказаними параметрами", value);
-        } else throw new EntityNotFoundException(String.class, "Не відповідає значенню (не номер і не пошта)", value);
+                } else throw new EntityNotFoundException(String.class, "Не відповідає значенню, ", value);
+            } else throw new EntityNotFoundException(String.class, "Значення не існує зі вказаними параметрами: ", value);
+        } else throw new EntityNotFoundException(String.class, "Не відповідає значенню (не номер і не пошта): ", value);
+    }
+
+
+    public void deleteFileFromTaskById(String idFiles, String idTask) {
+        Optional<User> findTask = repository.findById(idTask);
+        if(findTask.isPresent()){
+            if(findTask.get().getIcon() != null) {
+                String it= findTask.get().getIcon();
+                    if (it.equals(idFiles)){
+                        this.gridFsTemplate.delete(new Query(Criteria.where("_id").is(idFiles)));
+                        User newUser = findTask.get();
+                        newUser.setIcon(null);
+                        repository.save(newUser);
+                }
+            } else throw new EntityNotFoundException(String.class, "Значення не існує", idFiles.toString());
+        } else throw new EntityNotFoundException(String.class, "Значення не існує зі вказаними параметрами", idTask.toString());
+    }
+
+    private ObjectId uploadFilesByGridFs(MultipartFile document) throws IOException {
+        DBObject metaData = new BasicDBObject();
+        metaData.put("filename", document.getName());
+        metaData.put("size", document.getSize());
+        metaData.put("contentType", document.getContentType());
+        metaData.put("bytes", document.getBytes());
+        return gridFsTemplate.store(document.getInputStream(), document.getOriginalFilename(), metaData);
+    }
+
+    public LoadFile download(String isFiles) throws IOException {
+        GridFSFile gridFSFile = gridFsTemplate.findOne(new Query(Criteria.where("_id").is(isFiles)) );
+        LoadFile loadFile = new LoadFile();
+        if (gridFSFile != null && gridFSFile.getMetadata() != null) {
+            loadFile.setFilename(gridFSFile.getFilename() );
+            loadFile.setFileType(gridFSFile.getMetadata().get("contentType").toString() );
+            loadFile.setFileSize(gridFSFile.getMetadata().get("size").toString() );
+            loadFile.setFile(IOUtils.toByteArray(gridFsOperations.getResource(gridFSFile).getInputStream()));
+        } else  throw new EntityNotFoundException(String.class, "Значення не існує зі вказаними параметрами");
+        return loadFile;
     }
 }

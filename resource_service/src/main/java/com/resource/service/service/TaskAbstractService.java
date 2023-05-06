@@ -1,15 +1,11 @@
 package com.resource.service.service;
 
 import com.resource.service.model.Comments;
-import com.resource.service.model.Task;
 import com.resource.service.repository.EntityRepository;
-import org.bson.types.ObjectId;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class TaskAbstractService<T, ID extends Serializable> implements TaskServiceInterface<T, ID>{
@@ -20,8 +16,8 @@ public abstract class TaskAbstractService<T, ID extends Serializable> implements
     }
 
     @Override
-    public T saveTask(T entity, MultipartFile multipartFile) throws IOException {
-        return repository.save(entity);
+    public void saveTask(T entity, MultipartFile multipartFile) throws IOException {
+        repository.save(entity);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.assistant.registration_service.user.controller;
 
 import com.assistant.registration_service.user.model_data.model.User;
+import com.assistant.registration_service.user.model_data.model.resource_service.UsersAndCountTasks;
 import com.assistant.registration_service.user.service.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,8 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.IOException;
 
 
 @Tag(name = "Користувачі", description = "Методи для роботи з користувачами (CRUD)")
@@ -25,8 +28,9 @@ public class AdminController {
 
     @PostMapping("/create")
     @Operation(summary = "Зберегти дані про користувача, якого ще немає в базі даних")
-    public User saveUserDetails(@Valid @RequestBody User user){
-        return service.saveUser(user);
+    public User saveUserDetails(@Valid @RequestPart(value = "json") User user,
+                                @RequestPart(value = "file", required = false) MultipartFile multipartFile) throws IOException {
+        return service.saveUser(user, multipartFile);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -38,7 +42,7 @@ public class AdminController {
 
     @GetMapping("/list/users")
     @Operation(summary = "Показати всі дані про користувачів, що існують в базі даних")
-    public User showListOfAllUser(String status){
-        return service.findAllByStatusAndRolesOrderByName(status);
+    public UsersAndCountTasks showListOfAllUser(){
+        return service.findAllByRolesOrderByName();
     }
 }

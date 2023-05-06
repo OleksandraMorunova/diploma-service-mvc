@@ -26,11 +26,10 @@ public class CustomUserDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> userOptional = Optional.ofNullable(service.findUserByEmail(username));
         org.springframework.security.core.userdetails.User.UserBuilder userBuilder;
-        EncodedData encodedData = new EncodedData();
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             userBuilder = org.springframework.security.core.userdetails.User.withUsername(username);
-            userBuilder.password(encodedData.encoded(user.getPassword()));
+            userBuilder.password(EncodedData.encoded(user.getPassword()));
             List<Role> roleList = new ArrayList<>(user.getRoles());
             String[] roles = new String[roleList.size()];
             for (int i = 0; i < roleList.size(); i++) {

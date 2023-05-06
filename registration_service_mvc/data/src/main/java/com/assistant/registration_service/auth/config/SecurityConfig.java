@@ -31,6 +31,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/refresh").hasAnyRole("ROLE_ADMIN")
                         .requestMatchers("/otc/**").permitAll()
                         .requestMatchers("api/admin/**").hasRole("ROLE_ADMIN")
+                        .requestMatchers("api/tasks/list").hasRole("ROLE_ADMIN")
                         .requestMatchers("/api/content/check/**").permitAll()
                         .requestMatchers("/api/content/update/**").permitAll()
                         .requestMatchers("api/content/**").hasAnyRole("ROLE_ADMIN", "ROLE_USER")

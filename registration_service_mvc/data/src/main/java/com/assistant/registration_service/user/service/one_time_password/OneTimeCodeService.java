@@ -5,6 +5,7 @@ import com.assistant.registration_service.user.model_data.enums.EmailMessage;
 import com.assistant.registration_service.user.model_data.enums.SmsHtmlMessage;
 import com.assistant.registration_service.user.model_data.model.User;
 import com.assistant.registration_service.user.repository.EntityRepository;
+import com.assistant.registration_service.user.repository.UserEntityRepository;
 import com.assistant.registration_service.user.service.sent_to_email.SmsSendTwilio;
 import com.assistant.registration_service.user.service.user.UserService;
 import jakarta.mail.Message;
@@ -20,6 +21,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
+/**
+ * Receive logs program
+ * @author Oleksandra Morunova
+ *
+ */
 @Service
 public class OneTimeCodeService extends AbstractOneTimeCodeService<User, String> {
     private final SmsSendTwilio sendService;
@@ -28,8 +34,9 @@ public class OneTimeCodeService extends AbstractOneTimeCodeService<User, String>
 
     private final JavaMailSender javaMailSender;
 
-    public OneTimeCodeService(EntityRepository<User, String> repository, SmsSendTwilio sendService, UserService userService, JavaMailSender javaMailSender) {
+    public OneTimeCodeService(EntityRepository<User, String> repository, UserEntityRepository userEntityRepository, SmsSendTwilio sendService, UserService userService, JavaMailSender javaMailSender) {
         super(repository);
+        this.userEntityRepository = userEntityRepository;
         this.sendService = sendService;
         this.userService = userService;
         this.javaMailSender = javaMailSender;
@@ -50,7 +57,7 @@ public class OneTimeCodeService extends AbstractOneTimeCodeService<User, String>
 
     @Override
     public void deleteCode(String code){
-        Optional<User> u = Optional.ofNullable(repository.findUserByCode(code));
+        Optional<User> u = Optional.ofNullable(userEntityRepository.findUserByCode(code));
         if(u.isPresent() && validateCode(code)){
             User new_u = u.get();
             if(LocalDateTime.now().isBefore(LocalDateTime.parse(new_u.getCodeData()).plusMinutes(5))){

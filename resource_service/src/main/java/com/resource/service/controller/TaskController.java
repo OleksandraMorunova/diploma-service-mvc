@@ -43,12 +43,12 @@ public class TaskController {
 
     @GetMapping("/list/{idUser}")
     @Operation(summary = "Отримати всі завдання користувача за його ідентифікатором користувача")
-    public ResponseEntity<?> list(@Valid @PathVariable("idUser") @Pattern(regexp = REGEX_VALID_OBJECT_ID)
+    public ResponseEntity<List<Task>> list(@Valid @PathVariable("idUser") @Pattern(regexp = REGEX_VALID_OBJECT_ID)
                                       @NotBlank(message = "ID may not empty") String idUser){
         List<Task> taskList = service.findAllTaskById(new ObjectId(idUser));
         if(taskList.isEmpty()){
-            return new ResponseEntity<>("Task not founded", HttpStatus.NOT_FOUND);
-        } else return new ResponseEntity<>(taskList, HttpStatus.FOUND);
+            return new ResponseEntity<>(taskList, HttpStatus.NOT_FOUND);
+        } else return new ResponseEntity<>(taskList, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{idTask}")

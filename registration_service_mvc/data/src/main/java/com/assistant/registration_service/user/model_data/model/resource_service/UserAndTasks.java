@@ -1,11 +1,12 @@
 package com.assistant.registration_service.user.model_data.model.resource_service;
 
+import com.assistant.registration_service.user.model_data.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.bson.types.ObjectId;
-import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.util.List;
 
 /**
  * Receive logs program
@@ -16,10 +17,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CommentsDto {
-    private String id;
-    private String user_comment_id;
-    private String comment;
-    private String comment_added_data;
-    private Boolean reviewed;
+public class UserAndTasks {
+    private User userDto;
+    private List<TaskDto> taskDto;
 }

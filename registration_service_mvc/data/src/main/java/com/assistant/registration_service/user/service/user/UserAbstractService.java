@@ -1,43 +1,39 @@
 package com.assistant.registration_service.user.service.user;
 
+import com.assistant.registration_service.user.model_data.model.User;
+import com.assistant.registration_service.user.model_data.model.resource_service.UserAndTasks;
 import com.assistant.registration_service.user.repository.EntityRepository;
+import com.assistant.registration_service.user.repository.UserEntityRepository;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 
 public abstract class UserAbstractService<T, ID extends Serializable> implements UserServiceInterface<T, ID> {
     protected EntityRepository<T, ID> repository;
+    protected UserEntityRepository userEntityRepository;
 
     public UserAbstractService(EntityRepository<T, ID> repository){
         this.repository = repository;
     }
 
     @Override
-    public T saveUser(T entity){
-        return repository.save(entity);
+    public void delete(String email){
+        userEntityRepository.deleteUserByEmail(email);
     }
 
     @Override
-    public T delete(ID email){
-        return repository.deleteUserByEmail(email);
+    public User findUserByEmail(String email){
+        return userEntityRepository.findUserByEmail(email);
     }
 
     @Override
-    public T findUserByEmail(ID email){
-        return repository.findUserByEmail(email);
+    public User findUserByPhone(String phoneNumber){
+        return userEntityRepository.findUserByPhone(phoneNumber);
     }
 
     @Override
-    public T findUserByPhone(ID phoneNumber){
-        return repository.findUserByPhone(phoneNumber);
-    }
-
-    @Override
-    public T findAllByStatusAndRolesOrderByName(ID status){
-        return repository.findAllByStatusAndRolesOrderByName(status, null);
-    }
-
-    @Override
-    public T findUserByEmailOrPhoneAndStatus(ID value){
-        return repository.findUserByCode(value);
+    public User findUserByEmailOrPhoneAndStatus(String value){
+        return userEntityRepository.findUserByCode(value);
     }
 }

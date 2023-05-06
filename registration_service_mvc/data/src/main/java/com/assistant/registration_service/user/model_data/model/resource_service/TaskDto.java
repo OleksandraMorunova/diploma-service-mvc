@@ -4,6 +4,11 @@ import lombok.*;
 import org.bson.types.ObjectId;
 import java.util.List;
 
+/**
+ * Receive logs program
+ * @author Oleksandra Morunova
+ *
+ */
 @Getter
 @Setter
 @AllArgsConstructor

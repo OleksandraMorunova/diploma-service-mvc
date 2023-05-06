@@ -5,6 +5,7 @@ import com.assistant.registration_service.user.model_data.enums.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.*;
@@ -14,6 +15,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+/**
+ * Receive logs program
+ * @author Oleksandra Morunova
+ *
+ */
 @Document(collection = "user_accounts")
 @Data
 @AllArgsConstructor
@@ -46,7 +52,8 @@ public class User implements Serializable {
 
     @Field("roles")
     @Schema(description = "Роль користувача")
-    private Set<Role> roles = Collections.singleton(Role.USER);
+   // @Pattern(regexp = "ADMIN|USER", Pattern.CASE_INSENSITIVE)
+    private Set<Role> roles;
 
     @Field("status")
     @Schema(description = "Статус користувача")
@@ -62,4 +69,8 @@ public class User implements Serializable {
     @Field("one_time_code_data")
     @Schema(description = "Дата створення одноразового паролю для входу")
     private String codeData;
+
+    @Field("icon")
+    @Schema(description = "Світлина користувача")
+    private String icon;
 }

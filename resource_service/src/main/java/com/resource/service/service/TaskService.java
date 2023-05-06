@@ -33,7 +33,7 @@ public class TaskService extends TaskAbstractService<Task, ObjectId>{
 
     @Override
     @Transactional
-    public Task saveTask(Task entity, MultipartFile multipartFile) throws IOException {
+    public void saveTask(Task entity, MultipartFile multipartFile) throws IOException {
         entity.setUserId(entity.getUserId());
         entity.setTitle(entity.getTitle());
         entity.setDescription(entity.getDescription());
@@ -41,7 +41,7 @@ public class TaskService extends TaskAbstractService<Task, ObjectId>{
             List<ObjectId> documents = List.of(uploadFilesByGridFs(multipartFile));
             entity.setDocuments(documents);
         }
-        return repository.save(entity);
+        repository.save(entity);
     }
 
   @Override
@@ -69,6 +69,10 @@ public class TaskService extends TaskAbstractService<Task, ObjectId>{
         } else throw new EntityNotFoundException(String.class, "Значення не існує зі вказаними параметрами", idTask.toString());
     }
 
+    public List<Task> getListOfComments(){
+        return repository.findAll();
+    }
+
     @Override
     @Transactional
     public Task addCommentById(ObjectId idTask, Comments comments) {
@@ -76,16 +80,31 @@ public class TaskService extends TaskAbstractService<Task, ObjectId>{
         if(findTask.isPresent()){
             if(findTask.get().getComments() != null){
                 List<Comments> existList = findTask.get().getComments();
-                existList.add(new Comments(comments.getUser_comment_id(), comments.getComment(), comments.getComment_added_data()));
+                existList.add(new Comments(String.valueOf(ObjectId.get()), comments.getUser_comment_id(), comments.getComment(), comments.getComment_added_data(), false));
                 Task existTask = findTask.get();
                 existTask.setComments(existList);
                 return repository.save(existTask);
             } else {
-                List<Comments> newList = List.of(new Comments(comments.getUser_comment_id(), comments.getComment(), comments.getComment_added_data()));
+                List<Comments> newList = List.of(new Comments(String.valueOf(ObjectId.get()), comments.getUser_comment_id(), comments.getComment(), comments.getComment_added_data(), false));
                 Task existTask = findTask.get();
                 existTask.setComments(newList);
                 return repository.save(existTask);
             }
+        } else throw new EntityNotFoundException(String.class, "Значення не існує зі вказаними параметрами", idTask.toString());
+    }
+
+    public Task updateComment(ObjectId idTask, String idComment){
+        Optional<Task> findTask = Optional.ofNullable(repository.findTaskById(idTask));
+        if(findTask.isPresent()){
+            if(findTask.get().getComments() != null){
+                List<Comments> existList = findTask.get().getComments();
+                for(Comments c: existList){
+                    if(c.getId().equals(idComment)) c.setReviewed(true);
+                }
+                Task existTask = findTask.get();
+                existTask.setComments(existList);
+                return repository.save(existTask);
+            } else throw new EntityNotFoundException(String.class, "Коментаря не існує зі вказаними параметрами", idTask.toString());
         } else throw new EntityNotFoundException(String.class, "Значення не існує зі вказаними параметрами", idTask.toString());
     }
 
@@ -128,7 +147,6 @@ public class TaskService extends TaskAbstractService<Task, ObjectId>{
                         this.gridFsTemplate.delete(new Query(Criteria.where("_id").is(idFiles)));
                         it.remove();
                         Task newTask = findTask.get();
-                        System.out.println(newTask.getDocuments().size());
                         newTask.setDocuments(newTask.getDocuments().size() > 0 ? newListOfDocuments : null);
                         repository.save(newTask);
                     }
