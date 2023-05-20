@@ -1,0 +1,28 @@
+{
+  "properties": [
+    {
+      "name": "jwt.secret.refresh",
+      "type": "java.lang.String",
+      "description": "Description for jwt.secret.refresh."
+    },
+    {
+      "name": "jwt.secret.access",
+      "type": "java.lang.String",
+      "description": "Description for jwt.secret.access."
+    },
+    {
+      "name": "springdoc.api-docs.path",
+      "type": "java.lang.String",
+      "description": "Description for springdoc.api-docs.path."
+    },
+    {
+      "name": "springdoc.swagger-ui.path",
+      "type": "java.lang.String",
+      "description": "Description for springdoc.swagger-ui.path."
+    },
+    {
+      "name": "redis.session-data.ttl",
+      "type": "java.lang.String",
+      "description": "Description for redis.session-data.ttl."
+    }
+  ] }
