@@ -1,7 +1,7 @@
 package com.assistant.registration_service.user.model_data.model.resource_service;
 
 import lombok.*;
-import org.bson.types.ObjectId;
+
 import java.util.List;
 
 /**
@@ -15,11 +15,12 @@ import java.util.List;
 @NoArgsConstructor
 public class TaskDto {
     private String id;
-    private ObjectId userId;
+    private String userId;
     private String title;
     private String description;
-    private List<ObjectId> documents;
+    private List<String> files;
     private String addedData;
     private String updateData;
     private List<CommentsDto> comments;
+    private String audit;
 }

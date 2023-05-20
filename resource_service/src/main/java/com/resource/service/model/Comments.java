@@ -2,7 +2,6 @@ package com.resource.service.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;

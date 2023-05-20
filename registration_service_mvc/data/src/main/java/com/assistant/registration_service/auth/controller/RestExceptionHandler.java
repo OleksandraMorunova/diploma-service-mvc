@@ -109,7 +109,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({ ResourceNotFoundException.class })
     protected ResponseEntity<Object> handleSecurityException(ResourceNotFoundException ex){
-        ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, String.valueOf(HttpStatus.FORBIDDEN.value()), ex.getMessage(), "Doesn't exist data of inputting values");
+        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, String.valueOf(HttpStatus.NOT_FOUND.value()), ex.getMessage(), "Doesn't exist data of inputting values");
         return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 

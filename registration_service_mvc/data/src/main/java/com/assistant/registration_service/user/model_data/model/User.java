@@ -73,4 +73,8 @@ public class User implements Serializable {
     @Field("icon")
     @Schema(description = "Світлина користувача")
     private String icon;
+
+    @Field("firebase_token")
+    @Schema(description = "токен ккористувача для надсилання повідомлення")
+    private String userTokenFirebase;
 }

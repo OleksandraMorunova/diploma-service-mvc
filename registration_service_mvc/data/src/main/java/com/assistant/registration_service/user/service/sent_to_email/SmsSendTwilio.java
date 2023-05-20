@@ -18,8 +18,7 @@ public class SmsSendTwilio {
 
     public void sendSms(String number, String code){
         Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
-        Message.creator(
-                        new com.twilio.type.PhoneNumber(number),
+        Message.creator(new com.twilio.type.PhoneNumber(number),
                         new com.twilio.type.PhoneNumber(OUTGOING_SMS_NUMBER),
                         "[#][Emmo Techie] код підтвердження:" + code + "\nePWjCxibElD")
                 .create();

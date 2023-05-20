@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Collection;
 
 @RestController
@@ -24,7 +25,7 @@ public class AuthController {
     private final TokenService tokenService;
 
     @PostMapping("/login")
-    public ResponseEntity<JwtResponse> login(@Valid @RequestBody JwtRequest authRequest) throws AuthException {
+    public ResponseEntity<JwtResponse> login(@Valid @RequestBody JwtRequest authRequest) throws AuthException, IOException {
         final JwtResponse token = tokenService.login(authRequest);
         return ResponseEntity.ok(token);
     }
@@ -36,16 +37,8 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> getNewRefreshToken(@Valid @RequestBody RefreshJwtRequest request) throws AuthException{
+    public ResponseEntity<?> getNewRefreshToken(@Valid @RequestBody RefreshJwtRequest request) throws AuthException, IOException {
         final JwtResponse token = tokenService.getRefreshToken(request.getRefreshToken());
         return ResponseEntity.ok(token);
-    }
-
-    @GetMapping("/valid/token")
-    public ResponseEntity<?> validatedToken(@Valid @RequestBody AccessJwtToken token) throws AuthException {
-        Collection<?> collection = tokenService.validatedToken(token);
-        if(collection.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        } else return new ResponseEntity<>(collection, HttpStatus.OK);
     }
 }

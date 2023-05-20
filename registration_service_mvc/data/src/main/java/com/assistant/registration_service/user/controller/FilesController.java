@@ -7,14 +7,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 @RequestMapping("api/files")
 @RestController
@@ -35,6 +30,6 @@ public class FilesController {
                                            @NotBlank(message = "ID may not empty") String idTask,
                                        @Valid @PathVariable("idFiles") @Pattern(regexp = REGEX_VALID_OBJECT_ID)
                                        @NotBlank(message = "ID may not empty") String idFiles){
-        service.deleteFileFromTaskById(idFiles, idTask);
+        service.deleteIconFromUserById(idFiles, idTask);
     }
 }

@@ -9,5 +9,4 @@ public interface UserServiceInterface<T, ID extends Serializable> {
     void delete(String email);
     User findUserByEmail(String email);
     User findUserByPhone(String phoneNumber);
-    User findUserByEmailOrPhoneAndStatus(String value);
 }

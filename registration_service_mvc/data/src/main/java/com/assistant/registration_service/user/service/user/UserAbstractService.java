@@ -18,8 +18,8 @@ public abstract class UserAbstractService<T, ID extends Serializable> implements
     }
 
     @Override
-    public void delete(String email){
-        userEntityRepository.deleteUserByEmail(email);
+    public void delete(String id){
+        userEntityRepository.deleteUsersById(id);
     }
 
     @Override
@@ -30,10 +30,5 @@ public abstract class UserAbstractService<T, ID extends Serializable> implements
     @Override
     public User findUserByPhone(String phoneNumber){
         return userEntityRepository.findUserByPhone(phoneNumber);
-    }
-
-    @Override
-    public User findUserByEmailOrPhoneAndStatus(String value){
-        return userEntityRepository.findUserByCode(value);
     }
 }

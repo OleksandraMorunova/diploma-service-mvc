@@ -14,6 +14,8 @@ public interface UserEntityRepository extends EntityRepository<User, String> {
     User findUserById(String id);
     User findUserByPhone(String phoneNumber);
     User findUserByCode(String code);
-    void deleteUserByEmail(String email);
-    List<User> findUsersByRolesOrderByName(String roles);
+    void deleteUsersById(String id);
+
+    @Override
+    List<User> findAll();
 }

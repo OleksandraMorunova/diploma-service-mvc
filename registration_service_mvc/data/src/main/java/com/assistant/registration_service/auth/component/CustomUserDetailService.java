@@ -2,7 +2,6 @@ package com.assistant.registration_service.auth.component;
 
 import com.assistant.registration_service.user.model_data.enums.Role;
 import com.assistant.registration_service.user.model_data.model.User;
-import com.assistant.registration_service.user.service.EncodedData;
 import com.assistant.registration_service.user.service.user.UserService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -29,7 +28,7 @@ public class CustomUserDetailService implements UserDetailsService {
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             userBuilder = org.springframework.security.core.userdetails.User.withUsername(username);
-            userBuilder.password(EncodedData.encoded(user.getPassword()));
+            userBuilder.password(user.getPassword());
             List<Role> roleList = new ArrayList<>(user.getRoles());
             String[] roles = new String[roleList.size()];
             for (int i = 0; i < roleList.size(); i++) {

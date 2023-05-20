@@ -10,26 +10,28 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-@Document(collection = "users_task")
+@Document(collection = "users_task_response")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Task {
+public class ResponseTask {
     @Id
     private String id;
 
     @Field("user_id")
+    @NonNull
     @Schema(description = "Номер користувача, що додав завдання")
     private String userId;
 
-    @Field("title")
-    @Schema(description = "Опис заголовку завдання")
-    private String title;
+    @Field("task_id")
+    @NonNull
+    @Schema(description = "Номер користувача, що додав завдання")
+    private String taskId;
 
-    @Field("description")
+    @Field("text")
     @Schema(description = "Опис основної частини завдання")
-    private String description;
+    private String text;
 
     @Field("files")
     @Schema(description = "Файли до завдання")
@@ -38,16 +40,4 @@ public class Task {
     @Field("added_data")
     @Schema(description = "Дата і час додавання данних")
     private String addedData = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-
-    @Field("update_data")
-    @Schema(description = "Дата і час оновлення данних")
-    private String updateData;
-
-    @Field("comments")
-    @Schema(description = "Коментарі до завдання користувача")
-    private List<Comments> comments;
-
-    @Field("audit")
-    @Schema(description = "Перевірка завдання")
-    private String audit;
 }

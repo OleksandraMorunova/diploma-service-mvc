@@ -1,6 +1,7 @@
 package com.assistant.registration_service.user.service.user;
 
 import com.assistant.registration_service.auth.exceptions.EntityNotFoundException;
+import com.assistant.registration_service.auth.service.PasswordEncoder;
 import com.assistant.registration_service.user.model_data.enums.Role;
 import com.assistant.registration_service.user.model_data.enums.UserStatus;
 import com.assistant.registration_service.user.model_data.model.LoadFile;
@@ -10,7 +11,6 @@ import com.assistant.registration_service.user.model_data.model.User;
 import com.assistant.registration_service.user.model_data.model.resource_service.UsersAndCountTasks;
 import com.assistant.registration_service.user.repository.EntityRepository;
 import com.assistant.registration_service.user.repository.UserEntityRepository;
-import com.assistant.registration_service.user.service.EncodedData;
 import com.assistant.registration_service.auth.exceptions.ResourceNotFoundException;
 import com.assistant.registration_service.user.service.task.TaskFeignClientInterface;
 import com.mongodb.BasicDBObject;
@@ -24,7 +24,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsOperations;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -49,25 +48,25 @@ public class UserService extends UserAbstractService<User,String> {
 
     @Override
     public User findUserByPhone(String phoneNumber){
-        return userEntityRepository.findUserByPhone(EncodedData.encoded(phoneNumber));
+        return userEntityRepository.findUserByPhone(phoneNumber);
     }
 
     @Override
     public User findUserByEmail(String email) {
-        return userEntityRepository.findUserByEmail(EncodedData.encoded(email));
+        return userEntityRepository.findUserByEmail(email);
     }
 
-    public UsersAndCountTasks findAllByRolesOrderByName(){
-        List<User> userList = userEntityRepository.findUsersByRolesOrderByName(Role.USER.name());
+    public User findById(String id){
+        return userEntityRepository.findUserById(id);
+    }
+
+    public UsersAndCountTasks findAll(){
+        List<User> userList = userEntityRepository.findAll();
         List<Integer> integerList = new ArrayList<>();
-        userList.forEach(l -> {
-            try {
-                ResponseEntity<List<TaskDto>> r = clientInterface.getListOfTasksForUserById(l.getId());
-                if(r.getBody() != null) integerList.add(r.getBody().size());
-            } catch (FeignException e){
-                integerList.add(0);
-            }
-        });
+        for(User u : userList){
+            List<TaskDto> r = clientInterface.getListOfTasksForUserById(u.getId());
+            integerList.add(r == null ? 0 : r.size());
+        }
         return new UsersAndCountTasks(userList, integerList);
     }
 
@@ -75,30 +74,40 @@ public class UserService extends UserAbstractService<User,String> {
     public User saveUser(User entity, MultipartFile multipartFile) throws IOException {
         Optional<User> u = Optional.ofNullable(findUserByPhone(entity.getPhone()));
         if(u.isEmpty() && entity.getRoles() != null){
-            entity.setName(EncodedData.encoded(entity.getName()));
-            entity.setPhone(EncodedData.encoded(entity.getPhone()));
+            entity.setName(entity.getName());
+            entity.setPhone(entity.getPhone());
             entity.setRoles(entity.getRoles());
             entity.setStatus(String.valueOf(UserStatus.DEACTIVATED));
-            entity.setCode(null); entity.setCodeData(null); entity.setToken(null);
+            entity.setUserTokenFirebase(null);
+            entity.setCode(null);
+            entity.setCodeData(null);
+            entity.setToken(null);
             if(multipartFile != null && !multipartFile.isEmpty()){
                 String documents = String.valueOf(uploadFilesByGridFs(multipartFile));
                 entity.setIcon(documents);
             }
             return repository.save(entity);
         } else throw new ResourceNotFoundException("Phone number exist: " + entity.getPhone() + " or don't set roles.");
-
     }
 
     public User updateUser(String phone, User entity, MultipartFile multipartFile) throws IOException {
-        Optional<User> u = Optional.ofNullable(findUserByPhone(phone));
+        Optional<User> u = findUserByPhone(phone) != null ? Optional.ofNullable(findUserByPhone(phone)) : repository.findById(phone);
         if(u.isPresent()){
             User optional = u.get();
-            System.out.println( optional.getPhone());
-            optional.setEmail(entity.getEmail() != null ? EncodedData.encoded(entity.getEmail()) : optional.getEmail());
-            optional.setPhone(entity.getPhone() != null ? EncodedData.encoded(entity.getPhone()) : optional.getPhone());
-            optional.setPassword(entity.getPassword() != null ? EncodedData.encoded(entity.getPassword()) : optional.getPassword());
-            optional.setRoles(entity.getRoles() != null ? entity.getRoles() : optional.getRoles());
+            optional.setName((entity.getName() != null) ? entity.getName() : optional.getName());
+            optional.setEmail((entity.getEmail() != null) ? entity.getEmail() : optional.getEmail());
+            optional.setPhone((entity.getPhone() != null) ? entity.getPhone() : optional.getPhone());
+            optional.setPassword((entity.getPassword() != null) ? PasswordEncoder.encode(entity.getPassword()) : optional.getPassword());
+            optional.setStatus((entity.getStatus() != null) ? entity.getStatus() : optional.getStatus());
+            Set<Role> set = entity.getRoles();
+            if (set != null && !set.isEmpty()) {
+                optional.setRoles(entity.getRoles());
+            } else {
+                optional.setRoles(optional.getRoles());
+            }
 
+            optional.setToken((entity.getToken() != null) ? entity.getToken() : optional.getToken());
+            optional.setUserTokenFirebase((entity.getUserTokenFirebase() != null) ? entity.getUserTokenFirebase() : optional.getUserTokenFirebase());
             if(multipartFile != null && !multipartFile.isEmpty()){
                 if(u.get().getIcon() != null){
                     String o = String.valueOf(uploadFilesByGridFs(multipartFile));
@@ -125,10 +134,9 @@ public class UserService extends UserAbstractService<User,String> {
 
         if(user != null){
            try{
-               ResponseEntity<List<TaskDto>> r = clientInterface.getListOfTasksForUserById(user.getId());
-               List<TaskDto> task = r.getBody();
+               List<TaskDto> r = clientInterface.getListOfTasksForUserById(user.getId());
                response.setUserDto(user);
-               response.setTaskDto(task);
+               response.setTaskDto(r);
                return response;
            } catch (FeignException e){
                response.setUserDto(user);
@@ -138,38 +146,17 @@ public class UserService extends UserAbstractService<User,String> {
         } else throw new EntityNotFoundException(String.class, "Значення не існує зі вказаними параметрами: ", email);
     }
 
-    @Override
-    public User findUserByEmailOrPhoneAndStatus(String value){
-        if(value.contains("@")) {
-            Optional<User> userEmail = Optional.ofNullable(findUserByEmail(value));
-            if(userEmail.isPresent()){
-                if(Objects.equals(userEmail.get().getStatus(), UserStatus.ACTIVE.toString())){
-                    return findUserByEmail(value);
-                } else throw new EntityNotFoundException(String.class, "Не відповідає значенню, ", value);
-            } else throw new EntityNotFoundException(String.class, "Значення не існує зі вказаними параметрами: ", value);
-        }
-        else if(value.matches("(?=.*[0-9]+).{4,15}")){
-            Optional<User> userPhone = Optional.ofNullable(findUserByPhone(value));
-            if(userPhone.isPresent()){
-                if(Objects.equals(userPhone.get().getStatus(), UserStatus.DEACTIVATED.toString())) {
-                    return findUserByPhone(value);
-                } else throw new EntityNotFoundException(String.class, "Не відповідає значенню, ", value);
-            } else throw new EntityNotFoundException(String.class, "Значення не існує зі вказаними параметрами: ", value);
-        } else throw new EntityNotFoundException(String.class, "Не відповідає значенню (не номер і не пошта): ", value);
-    }
-
-
-    public void deleteFileFromTaskById(String idFiles, String idTask) {
+    public void deleteIconFromUserById(String idFiles, String idTask) {
         Optional<User> findTask = repository.findById(idTask);
         if(findTask.isPresent()){
             if(findTask.get().getIcon() != null) {
-                String it= findTask.get().getIcon();
+                String it = findTask.get().getIcon();
                     if (it.equals(idFiles)){
                         this.gridFsTemplate.delete(new Query(Criteria.where("_id").is(idFiles)));
                         User newUser = findTask.get();
                         newUser.setIcon(null);
                         repository.save(newUser);
-                }
+                    }
             } else throw new EntityNotFoundException(String.class, "Значення не існує", idFiles.toString());
         } else throw new EntityNotFoundException(String.class, "Значення не існує зі вказаними параметрами", idTask.toString());
     }

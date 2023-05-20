@@ -34,15 +34,15 @@ public class AdminController {
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/delete/{email}")
+    @DeleteMapping("/delete/{id}")
     @Operation(summary = "Видалити всі дані про користувача за його електронною поштою")
-    public void deleteUserDetails(@Valid @PathVariable("email") @NotBlank(message = "Email may not be empty") @Email String email){
-        service.delete(email);
+    public void deleteUserDetails(@Valid @PathVariable("id") @NotBlank(message = "Email may not be empty") String id){
+        service.delete(id);
     }
 
     @GetMapping("/list/users")
     @Operation(summary = "Показати всі дані про користувачів, що існують в базі даних")
     public UsersAndCountTasks showListOfAllUser(){
-        return service.findAllByRolesOrderByName();
+        return service.findAll();
     }
 }

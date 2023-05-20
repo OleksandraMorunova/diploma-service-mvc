@@ -1,10 +1,14 @@
 package com.assistant.registration_service.user.service.task;
 
 import com.assistant.registration_service.user.model_data.model.resource_service.TaskDto;
+import feign.Headers;
+import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.cloud.openfeign.support.JsonFormWriter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -14,13 +18,32 @@ import java.util.List;
  *
  */
 
-@FeignClient(name = "RESOURCE-SERVICE", url = "http://localhost:8443")
+@FeignClient(
+        name = "RESOURCE-SERVICE-TASKS",
+        url = "http://localhost:8443",
+        configuration = ClientConfiguration.class)
 public interface TaskFeignClientInterface {
+    @GetMapping("/api/v1/task/{idTask}")
+    TaskDto getTaskByIdTask(@PathVariable("idTask") String idTask);
 
     @GetMapping("/api/v1/task/list/{idUser}")
-    ResponseEntity<List<TaskDto>> getListOfTasksForUserById(@PathVariable("idUser") String idUser);
+    List<TaskDto> getListOfTasksForUserById(@PathVariable("idUser") String idUser);
 
-    @GetMapping("/api/v1/comments/list")
-    List<TaskDto> getListOfAllTasks();
+    @PostMapping(value = "/api/v1/task/create", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    void save(@RequestPart(value = "json") TaskDto task,
+                     @RequestPart(value = "file") List<MultipartFile> multipartFile);
+    @PutMapping(value = "/api/v1/task/update/{idTask}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    TaskDto update(@PathVariable("idTask") String idTask,
+                   @RequestPart(value = "json", required = false) TaskDto task,
+                   @RequestParam(value = "file", required = false) List<MultipartFile> multipartFile);
+
+    @DeleteMapping("/api/v1/task/delete/{idTask}")
+    void delete(@Valid @PathVariable("idTask") String idTask);
 }
 
+class ClientConfiguration {
+    @Bean
+    public JsonFormWriter jsonFormWriter() {
+        return new JsonFormWriter();
+    }
+}

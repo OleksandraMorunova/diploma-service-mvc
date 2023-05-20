@@ -1,7 +1,6 @@
 package com.assistant.registration_service.auth.component;
 
 import com.assistant.registration_service.user.model_data.model.User;
-import com.assistant.registration_service.user.service.EncodedData;
 import com.mongodb.lang.NonNull;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -35,11 +34,12 @@ public class JwtTokenProvider {
     }
 
     public String generateAccessToken(@NonNull User user) {
-        final Instant accessExpirationInstant = LocalDateTime.now().plusWeeks(4).atZone(ZoneId.systemDefault()).toInstant();
+        final Instant accessExpirationInstant = LocalDateTime.now().plusDays(1).atZone(ZoneId.systemDefault()).toInstant();
         final Date accessExpiration = Date.from(accessExpirationInstant);
-        Claims claims = Jwts.claims().setSubject(EncodedData.decoded(user.getEmail()));
-        claims.put("name", EncodedData.decoded(user.getName()));
-        claims.put("email", EncodedData.decoded(user.getEmail()));
+        Claims claims = Jwts.claims().setSubject(user.getEmail());
+        claims.put("name", user.getName());
+        claims.put("email", user.getEmail());
+        claims.put("status", user.getStatus());
         claims.put("role", user.getRoles());
 
         return Jwts.builder()
@@ -53,10 +53,10 @@ public class JwtTokenProvider {
     }
 
     public String generateRefreshToken(@NonNull User user) {
-        final Instant refreshExpirationInstant = LocalDateTime.now().plusMinutes(10).atZone(ZoneId.systemDefault()).toInstant();
+        final Instant refreshExpirationInstant = LocalDateTime.now().plusWeeks(1).atZone(ZoneId.systemDefault()).toInstant();
         final Date refreshExpiration = Date.from(refreshExpirationInstant);
         return Jwts.builder()
-                .setSubject(user.getEmail())
+                .setSubject(user.getId())
                 .setExpiration(refreshExpiration)
                 .signWith(jwtRefreshSecret)
                 .compact();

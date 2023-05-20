@@ -31,18 +31,24 @@ public class UserController {
 
     @GetMapping("/user/{email}")
     @Operation(summary = "Знайти дані про користувача за його електронною поштою")
-    public UserAndTasks findUserDetails(@Valid @PathVariable @Email @NotBlank(message = "Email may not be empty") String email) {
+    public UserAndTasks findUserDetails(@Valid @PathVariable("email") @Email @NotBlank(message = "Email may not be empty") String email) {
         return service.getUser(email);
     }
 
     @GetMapping("/check/email/{email}")
-    public User checkUserEmail(@Valid @PathVariable @Email @NotBlank(message = "Email may not be empty") String email){
+    public User checkUserEmail(@Valid @PathVariable("email") @Email @NotBlank(message = "Email may not be empty") String email){
         return service.findUserByEmail(email);
     }
 
+    @GetMapping("/check/id/{id}")
+    public User checkUserId(@Valid @PathVariable("id") @NotBlank(message = "Email may not be empty") String email){
+        return service.findById(email);
+    }
+
+
     @PutMapping("/update/{phone}")
     @Operation(summary = "Оновити дані про користувача, який вже існує в базі даних")
-    public User updateUserDetailsByPhone(@Valid @PathVariable @NotBlank(message = "Phone may not be empty") @Size(min = 4, max = 15) String phone,
+    public User updateUserDetailsByPhone(@Valid @PathVariable("phone") @NotBlank(message = "Phone may not be empty") @Size(min = 4, max = 15) String phone,
                                          @Valid @RequestPart(value = "json") User user,
                                          @RequestPart(value = "file", required = false) MultipartFile multipartFile) throws IOException {
         return service.updateUser(phone, user, multipartFile);
@@ -50,12 +56,7 @@ public class UserController {
 
     @GetMapping("/check/phone/{phone}")
     @Operation(summary = "Знайти дані користувача за його номером")
-    public User checkUserPhone(@Valid @PathVariable @NotBlank(message = "Phone may not be empty") String phone){
+    public User checkUserPhone(@Valid @PathVariable("phone") @NotBlank(message = "Phone may not be empty") String phone){
         return service.findUserByPhone(phone);
-    }
-
-    @GetMapping("/check/status/{value}")
-    public User findUserByEmailOrPhoneAndStatus(@Valid @PathVariable("value") @NotBlank(message = "Phone or email may not be empty") String value){
-        return service.findUserByEmailOrPhoneAndStatus(value);
     }
 }
