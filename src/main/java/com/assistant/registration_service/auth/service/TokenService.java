@@ -2,21 +2,20 @@ package com.assistant.registration_service.auth.service;
 
 import com.assistant.registration_service.auth.component.CustomUserDetailService;
 import com.assistant.registration_service.auth.component.JwtTokenProvider;
-import com.assistant.registration_service.auth.domain.AccessJwtToken;
 import com.assistant.registration_service.auth.domain.JwtRequest;
 import com.assistant.registration_service.auth.domain.JwtResponse;
 import com.assistant.registration_service.user.model_data.model.User;
-import com.assistant.registration_service.user.repository.UserEntityRepository;
 import com.assistant.registration_service.user.service.user.UserService;
 import io.jsonwebtoken.Claims;
 import jakarta.security.auth.message.AuthException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

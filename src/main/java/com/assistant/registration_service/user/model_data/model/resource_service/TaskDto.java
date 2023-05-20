@@ -1,6 +1,9 @@
 package com.assistant.registration_service.user.model_data.model.resource_service;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 

@@ -1,7 +1,6 @@
 package com.assistant.registration_service.user.service.task;
 
 import com.assistant.registration_service.user.model_data.model.resource_service.TaskDto;
-import feign.Headers;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.support.JsonFormWriter;

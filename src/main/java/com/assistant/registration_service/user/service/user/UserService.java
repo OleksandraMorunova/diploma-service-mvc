@@ -1,17 +1,17 @@
 package com.assistant.registration_service.user.service.user;
 
 import com.assistant.registration_service.auth.exceptions.EntityNotFoundException;
+import com.assistant.registration_service.auth.exceptions.ResourceNotFoundException;
 import com.assistant.registration_service.auth.service.PasswordEncoder;
 import com.assistant.registration_service.user.model_data.enums.Role;
 import com.assistant.registration_service.user.model_data.enums.UserStatus;
 import com.assistant.registration_service.user.model_data.model.LoadFile;
-import com.assistant.registration_service.user.model_data.model.resource_service.UserAndTasks;
-import com.assistant.registration_service.user.model_data.model.resource_service.TaskDto;
 import com.assistant.registration_service.user.model_data.model.User;
+import com.assistant.registration_service.user.model_data.model.resource_service.TaskDto;
+import com.assistant.registration_service.user.model_data.model.resource_service.UserAndTasks;
 import com.assistant.registration_service.user.model_data.model.resource_service.UsersAndCountTasks;
 import com.assistant.registration_service.user.repository.EntityRepository;
 import com.assistant.registration_service.user.repository.UserEntityRepository;
-import com.assistant.registration_service.auth.exceptions.ResourceNotFoundException;
 import com.assistant.registration_service.user.service.task.TaskFeignClientInterface;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -29,7 +29,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserService extends UserAbstractService<User,String> {

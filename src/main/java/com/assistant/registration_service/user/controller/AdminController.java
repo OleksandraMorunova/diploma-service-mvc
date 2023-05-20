@@ -5,7 +5,6 @@ import com.assistant.registration_service.user.model_data.model.resource_service
 import com.assistant.registration_service.user.service.user.UserService;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;

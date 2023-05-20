@@ -1,11 +1,8 @@
 package com.assistant.registration_service.user.service.user;
 
 import com.assistant.registration_service.user.model_data.model.User;
-import com.assistant.registration_service.user.model_data.model.resource_service.UserAndTasks;
 import com.assistant.registration_service.user.repository.EntityRepository;
 import com.assistant.registration_service.user.repository.UserEntityRepository;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 

@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -43,7 +42,7 @@ public class TasksController {
     }
 
     @PutMapping(value = "/update/{idTask}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public TaskDto updateTask(@jakarta.validation.Valid @PathVariable("idTask") @Pattern(regexp = REGEX_VALID_OBJECT_ID)
+    public TaskDto updateTask(@Valid @PathVariable("idTask") @Pattern(regexp = REGEX_VALID_OBJECT_ID)
                        @NotBlank(message = "ID may not empty") String idTask,
                        @RequestPart(value = "json", required = false) TaskDto task,
                        @RequestParam(value = "file", required = false) List<MultipartFile> multipartFile) {
@@ -51,7 +50,7 @@ public class TasksController {
     }
 
     @GetMapping("/{idTask}")
-    public TaskDto getTaskByIdTask(@jakarta.validation.Valid @PathVariable("idTask") @Pattern(regexp = REGEX_VALID_OBJECT_ID)
+    public TaskDto getTaskByIdTask(@Valid @PathVariable("idTask") @Pattern(regexp = REGEX_VALID_OBJECT_ID)
                                 @NotBlank(message = "ID may not empty") String idTask){
         return service.getTaskByIdTask(idTask);
     }

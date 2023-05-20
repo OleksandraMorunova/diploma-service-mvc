@@ -4,7 +4,8 @@ import com.assistant.registration_service.user.model_data.model.resource_service
 import com.assistant.registration_service.user.service.task.ChatFeignClientsInterface;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
