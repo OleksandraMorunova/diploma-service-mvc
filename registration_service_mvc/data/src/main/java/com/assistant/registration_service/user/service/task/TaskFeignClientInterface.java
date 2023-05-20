@@ -20,7 +20,7 @@ import java.util.List;
 
 @FeignClient(
         name = "RESOURCE-SERVICE-TASKS",
-        url = "http://localhost:8443",
+        url = "https://assistant-resource-service.azurewebsites.net",
         configuration = ClientConfiguration.class)
 public interface TaskFeignClientInterface {
     @GetMapping("/api/v1/task/{idTask}")

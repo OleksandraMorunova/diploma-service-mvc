@@ -13,7 +13,7 @@ import java.util.List;
  *
  */
 
-@FeignClient(name = "RESOURCE-SERVICE-COMMENTS", url = "http://localhost:8443")
+@FeignClient(name = "RESOURCE-SERVICE-COMMENTS", url = "https://assistant-resource-service.azurewebsites.net")
 public interface CommentsFeignClientInterface {
     @PostMapping("/api/v1/comments/create/{idTask}")
     TaskDto addComment(@PathVariable("idTask") String idTask, @RequestBody CommentsDto comments);

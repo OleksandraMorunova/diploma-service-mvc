@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @FeignClient(name = "RESOURCE-SERVICE-TASKS-RESPONSE",
-          url = "http://localhost:8443",
+          url = "https://assistant-resource-service.azurewebsites.net",
           configuration = ClientConfiguration.class)
 public interface TaskResponseFeignClientsInterface {
     @GetMapping("/api/v1/response/{idTask}")

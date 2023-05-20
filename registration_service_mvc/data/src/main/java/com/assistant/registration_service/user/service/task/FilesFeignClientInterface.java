@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "RESOURCE-SERVICE-FILES",
-        url = "http://localhost:8443",
+        url = "https://assistant-resource-service.azurewebsites.net",
         configuration = ClientConfiguration.class)
 public interface FilesFeignClientInterface {
     @GetMapping("/api/v1/files/download/{idFiles}")

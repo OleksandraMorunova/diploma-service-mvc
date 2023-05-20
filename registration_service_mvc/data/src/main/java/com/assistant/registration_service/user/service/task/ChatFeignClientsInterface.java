@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "RESOURCE-SERVICE-CHAT", url = "http://localhost:8443")
+@FeignClient(name = "RESOURCE-SERVICE-CHAT", url = "https://assistant-resource-service.azurewebsites.net")
 public interface ChatFeignClientsInterface {
     @PostMapping(value = "/api/v1/chat/create")
     Chat save(@RequestBody Chat chat);
