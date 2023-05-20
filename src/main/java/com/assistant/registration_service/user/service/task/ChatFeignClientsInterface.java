@@ -1,7 +1,6 @@
 package com.assistant.registration_service.user.service.task;
 
 import com.assistant.registration_service.user.model_data.model.resource_service.Chat;
-import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 

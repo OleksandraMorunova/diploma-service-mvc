@@ -1,15 +1,7 @@
 package com.assistant.registration_service.user.controller;
 
 import com.assistant.registration_service.user.model_data.model.resource_service.Chat;
-import com.assistant.registration_service.user.model_data.model.resource_service.CommentsDto;
-import com.assistant.registration_service.user.model_data.model.resource_service.TaskDto;
 import com.assistant.registration_service.user.service.chat.ChatService;
-import com.assistant.registration_service.user.service.task.CommentsFeignClientInterface;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +13,6 @@ import java.util.List;
  *
  */
 
-@Tag(name = "Чат", description = "Методи для роботи з чатом (CRUD)")
 @RequestMapping("api/chat")
 @RestController
 @RequiredArgsConstructor

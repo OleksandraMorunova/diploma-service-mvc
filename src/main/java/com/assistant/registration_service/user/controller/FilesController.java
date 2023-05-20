@@ -2,7 +2,6 @@ package com.assistant.registration_service.user.controller;
 
 import com.assistant.registration_service.user.model_data.model.LoadFile;
 import com.assistant.registration_service.user.service.user.UserService;
-import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -25,7 +24,6 @@ public class FilesController {
     }
 
     @DeleteMapping("/delete/{idTask}/{idFiles}")
-    @Operation(summary = "Видалити файл користувача з його завдання за його ідентифікатором завдання та файлу")
     public void deleteFileFromTaskById(@Valid @PathVariable("idTask") @Pattern(regexp = REGEX_VALID_OBJECT_ID)
                                            @NotBlank(message = "ID may not empty") String idTask,
                                        @Valid @PathVariable("idFiles") @Pattern(regexp = REGEX_VALID_OBJECT_ID)

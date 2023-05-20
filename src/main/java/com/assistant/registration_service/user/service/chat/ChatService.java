@@ -2,7 +2,6 @@ package com.assistant.registration_service.user.service.chat;
 
 import com.assistant.registration_service.user.model_data.model.resource_service.Chat;
 import com.assistant.registration_service.user.service.task.ChatFeignClientsInterface;
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;

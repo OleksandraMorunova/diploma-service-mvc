@@ -1,22 +1,16 @@
 package com.assistant.registration_service.user.controller;
 
 import com.assistant.registration_service.user.model_data.model.resource_service.ResponseTask;
-import com.assistant.registration_service.user.service.resource.TasksAndCommentsAbstractService;
 import com.assistant.registration_service.user.service.resource.TasksService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
-@Tag(name = "Коментарі", description = "Методи для роботи з завданнями (CRUD)")
 @RequestMapping("api/response")
 @RestController
 @RequiredArgsConstructor
