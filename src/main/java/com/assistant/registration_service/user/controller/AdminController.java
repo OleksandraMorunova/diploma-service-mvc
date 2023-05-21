@@ -22,9 +22,8 @@ public class AdminController {
     private final UserService service;
 
     @PostMapping("/create")
-    public User saveUserDetails(@Valid @RequestPart(value = "json") User user,
-                                @RequestPart(value = "file", required = false) MultipartFile multipartFile) throws IOException {
-        return service.saveUser(user, multipartFile);
+        public User saveUserDetails(@Valid @RequestBody User user) {
+        return service.saveUser(user);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)

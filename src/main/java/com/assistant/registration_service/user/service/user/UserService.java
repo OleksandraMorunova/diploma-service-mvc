@@ -74,7 +74,7 @@ public class UserService extends UserAbstractService<User,String> {
     }
 
     @Transactional
-    public User saveUser(User entity, MultipartFile multipartFile) throws IOException {
+    public User saveUser(User entity) {
         Optional<User> u = Optional.ofNullable(findUserByPhone(entity.getPhone()));
         if(u.isEmpty() && entity.getRoles() != null){
             entity.setName(entity.getName());
@@ -85,16 +85,20 @@ public class UserService extends UserAbstractService<User,String> {
             entity.setCode(null);
             entity.setCodeData(null);
             entity.setToken(null);
-            if(multipartFile != null && !multipartFile.isEmpty()){
-                String documents = String.valueOf(uploadFilesByGridFs(multipartFile));
-                entity.setIcon(documents);
-            }
             return repository.save(entity);
         } else throw new ResourceNotFoundException("Phone number exist: " + entity.getPhone() + " or don't set roles.");
     }
 
     public User updateUser(String phone, User entity, MultipartFile multipartFile) throws IOException {
-        Optional<User> u = findUserByPhone(phone) != null ? Optional.ofNullable(findUserByPhone(phone)) : repository.findById(phone);
+        Optional<User> u;
+        if(findUserByPhone(phone) != null) {
+            u = Optional.ofNullable(findUserByPhone(phone));
+        } else if(repository.findById(phone).isPresent()){
+            u = repository.findById(phone);
+        } else {
+            u = Optional.ofNullable(findUserByEmail(phone));
+        }
+
         if(u.isPresent()){
             User optional = u.get();
             optional.setName((entity.getName() != null) ? entity.getName() : optional.getName());
