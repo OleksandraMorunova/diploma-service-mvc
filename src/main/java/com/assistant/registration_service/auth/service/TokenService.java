@@ -32,12 +32,9 @@ public class TokenService {
             throw new AuthException("Invalid password.");
         }
     }
-
     public JwtResponse getRefreshToken(@NonNull String refreshToken) throws AuthException, IOException {
         final String saveRefreshToken = validateRefreshToken(refreshToken).entrySet().iterator().next().getKey();
         User user = validateRefreshToken(refreshToken).get(saveRefreshToken);
-        System.out.println(saveRefreshToken);
-        System.out.println(refreshToken);
         if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
             return generateAccessAndRefreshTokens(user);
         } else {
