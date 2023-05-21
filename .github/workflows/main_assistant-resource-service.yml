@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy JAR app to Azure Web App - assistant-resource-service
+name: Build and deploy JAR app to Azure Web App - assistant-auth-service
 
 on:
   push:
@@ -49,5 +49,5 @@ jobs:
         with:
           app-name: 'assistant-resource-service'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_9A5CE3516E944A988A3528F7397E4522 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_61D55A451EA94207B5EE5FF7740226D7 }}
           package: '*.jar'
