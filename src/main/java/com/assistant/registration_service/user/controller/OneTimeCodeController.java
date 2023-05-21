@@ -21,20 +21,19 @@ public class OneTimeCodeController {
     private final OneTimeCodeService service;
 
     @PutMapping("/generated/code")
-   public ResponseEntity<?> sentToPhoneNumberAndDataBase(@Valid @RequestBody User phoneNumber) {
-        return new ResponseEntity<>(service.sentToPhoneNumberAndDataBase(phoneNumber), HttpStatus.OK);
+   public User sentToPhoneNumberAndDataBase(@Valid @RequestBody User phoneNumber) {
+        return service.sentToPhoneNumberAndDataBase(phoneNumber);
     }
 
     @DeleteMapping("/get/code/{code}")
-    public ResponseEntity<?> getAndDeleteCode(@Valid @PathVariable("code") @Pattern(regexp = "[0-9]+")
+    public void getAndDeleteCode(@Valid @PathVariable("code") @Pattern(regexp = "[0-9]+")
                                                   @NotBlank(message = "Code may not be empty")
                                                   @Size(min = 5, max = 5, message = "Name must be 5 characters long") String code) {
         service.deleteCode(code);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/sms")
-    public ResponseEntity<User> sentToEmailAndDataBase(@Valid @RequestBody User emailAndPhone) {
-        return new ResponseEntity<>(service.sentToEmailAndDataBase(emailAndPhone), HttpStatus.OK);
+    public User sentToEmailAndDataBase(@Valid @RequestBody User emailAndPhone) {
+        return service.sentToEmailAndDataBase(emailAndPhone);
     }
 }

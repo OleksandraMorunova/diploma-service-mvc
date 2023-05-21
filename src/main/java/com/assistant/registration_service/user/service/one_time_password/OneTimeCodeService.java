@@ -57,7 +57,7 @@ public class OneTimeCodeService extends AbstractOneTimeCodeService<User, String>
     @Override
     public void deleteCode(String code){
         Optional<User> u = Optional.ofNullable(userEntityRepository.findUserByCode(code));
-        if(u.isPresent() && validateCode(code)){
+        if(u.isPresent()){
             User new_u = u.get();
             if(LocalDateTime.now().isBefore(LocalDateTime.parse(new_u.getCodeData()).plusMinutes(5))){
                 new_u.setCode(null);
@@ -65,10 +65,6 @@ public class OneTimeCodeService extends AbstractOneTimeCodeService<User, String>
                 repository.save(new_u);
             } else throw new EntityNotFoundException(User.class, "Час активності коду минув : ", u.get().getCode());
         } else throw new EntityNotFoundException(String.class, "id", code);
-    }
-
-    private boolean validateCode(String code){
-        return code.chars().allMatch(Character::isDigit);
     }
 
     @Override
@@ -91,13 +87,20 @@ public class OneTimeCodeService extends AbstractOneTimeCodeService<User, String>
             u.get().setCode(code);
             u.get().setCodeData(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
             return repository.save(u.get());
-        } else throw new EntityNotFoundException(User.class, "id", user.getEmail());
+            } else throw new EntityNotFoundException(User.class, "id", user.getPhone() + " " + user.getEmail());
     }
 
     private User checkByValue(User user){
         if (user.getEmail() != null){
+            Optional<User> user1 = Optional.ofNullable(userService.findUserByEmail(user.getEmail()));
+            if(user1.isEmpty()){
+                return userService.findUserByPhone(user.getPhone());
+            }
             return userService.findUserByEmail(user.getEmail());
-        } else return userService.findUserByPhone(user.getPhone());
+        } else {
+            System.out.println("B");
+            return userService.findUserByPhone(user.getPhone());
+        }
     }
 
     private String createCode(){
