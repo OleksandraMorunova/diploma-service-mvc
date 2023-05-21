@@ -47,7 +47,7 @@ public class OneTimeCodeService extends AbstractOneTimeCodeService<User, String>
         sendService.sendSms(entity.getPhone(), code);
         Optional<User> u = Optional.ofNullable(userService.findUserByPhone(entity.getPhone()));
         if(u.isPresent()){
-            User new_u = new User();
+            User new_u = u.get();
             new_u.setCode(code);
             new_u.setCodeData(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
             return repository.save(new_u);
