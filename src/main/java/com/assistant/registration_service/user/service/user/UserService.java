@@ -34,6 +34,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Receive logs program
+ * @author Oleksandra Morunova
+ *
+ */
+
 @Service
 public class UserService extends UserAbstractService<User,String> {
     private final TaskFeignClientInterface clientInterface;
